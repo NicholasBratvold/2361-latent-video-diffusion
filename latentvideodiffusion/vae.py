@@ -57,10 +57,12 @@ def vae_loss(vae, data, key):
 
     return loss
 
-def make_vae(n_latent, size_multipier, key):
+def make_vae(n_latent, input_size, size_multipier, key):
+
     enc_key, dec_key = jax.random.split(key)
-    e = frame_vae.VAEEncoder(n_latent, size_multipier, enc_key)
-    d = frame_vae.VAEDecoder(n_latent, size_multipier, dec_key)
+
+    e = frame_vae.VAEEncoder(n_latent, input_size, size_multipier, enc_key)
+    d = frame_vae.VAEDecoder(n_latent, input_size, size_multipier, dec_key)
     
     vae = e,d
     return vae
@@ -129,7 +131,7 @@ def train(args, cfg):
     if args.checkpoint is None:
         key = jax.random.PRNGKey(cfg["seed"])
         init_key, state_key = jax.random.split(key)
-        vae = make_vae(cfg["lvm"]["n_latent"], cfg["vae"]["size_multiplier"], init_key)
+        vae = make_vae(cfg["lvm"]["n_latent"], cfg["transcode"]["target_size"],cfg["vae"]["size_multiplier"], init_key)
         opt_state = optimizer.init(vae)
         i = 0
         state = vae, opt_state, state_key, i

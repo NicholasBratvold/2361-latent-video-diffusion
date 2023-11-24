@@ -71,6 +71,10 @@ def sample_diffusion(inputs, model, f_neg_gamma, key, n_steps, shape):
     time_steps = jnp.linspace(0, 1, num=n_steps+1)
 
     n_samples = inputs.shape[0]
+    print("inputs")
+    print(jnp.std(inputs))
+    print(jnp.min(inputs))
+    print(jnp.max(inputs))
 
     z = jax.random.normal(key, (n_samples,) + shape)
     for i in range(n_steps):
@@ -88,7 +92,10 @@ def sample_diffusion(inputs, model, f_neg_gamma, key, n_steps, shape):
         z = (alpha_s/alpha_t)*(z + sigma_t*epsilon_hat*(k-1))
 
     outputs = z
-
+    print("outputs")
+    print(jnp.std(outputs))
+    print(jnp.min(outputs))
+    print(jnp.max(outputs))
     return outputs
 
 #@functools.partial(jax.jit, static_argnums=(2, 3))
@@ -123,6 +130,7 @@ def sample(args, cfg):
     #with jax.default_device(jax.devices("cpu")[0]):
 
     vae_state = lvd.utils.load_checkpoint(args.vae_checkpoint)
+    print("loaded VAE checkpoint")
     trained_vae = vae_state[0]
     m_encoder, m_decoder = map(lambda x: jax.vmap(jax.vmap(x)), trained_vae)
 
@@ -137,9 +145,9 @@ def sample(args, cfg):
     with lvd.latent_dataset.LatentDataset(data_directory=args.data_dir, 
         batch_size=n_samples, prompt_length=l_x, completion_length=l_y) as ld:
         prompt_samples, completion_samples = sample_datapoint(next(ld), data_key)
-
+    print("a")
     latent_continuations = sample_diffusion(prompt_samples, trained_dt, f_neg_gamma, dt_sample_key, n_steps, completion_samples.shape[1:])
-
+    print("b")
     continuation_frames = lvd.vae.sample_gaussian(m_decoder(latent_continuations), decode_sample_key)
     print(continuation_frames.shape)
     

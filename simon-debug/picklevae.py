@@ -105,3 +105,5 @@ class VAEDecoder(eqx.Module):
         log_var = self.log_var_output(h)+3
         return mean, log_var
 
+if __name__ == "__main__":
+    print('hi')

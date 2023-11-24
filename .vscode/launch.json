@@ -5,38 +5,23 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug : Train VAE",
-            "type": "python",
-            "request": "launch",
-            "program": "/home/vidmod/lvd-dev/2361-latent-video-diffusion/scripts/main.py",
-            "console": "integratedTerminal",
-            "justMyCode": true,
-            "env": { "PYTHONPATH": "${workspaceRoot}"},
-            "args" : [
-                "--config_file",
-                "/home/vidmod/lvd-dev/2361-latent-video-diffusion/configs/config.json",
-                "train_vae"
-            ]
-        },
-        {
             "name": "Debug : Sample Diffusion",
             "type": "python",
             "request": "launch",
             "program": "/home/vidmod/lvd-dev/2361-latent-video-diffusion/scripts/main.py",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "env": { "PYTHONPATH": "${workspaceFolder}/2361-latent-video-diffusion"},
             "args" : [
                 "--config_file",
                 "/home/vidmod/lvd-dev/2361-latent-video-diffusion/configs/config.json",
                 "sample_diffusion",
-                "--vae_checkpoint",
-                "/home/vidmod/lvd-dev/2361-latent-video-diffusion/checkpoints/checkpoint_vae_100.pkl",
+                "--vae_checkpoint", "checkpoints/checkpoint_vae_2400.pkl",
                 "--diffusion_checkpoint",
-                "/home/vidmod/lvd-dev/2361-latent-video-diffusion/checkpoints/checkpoint_dt_100.pkl",
+                "checkpoints/checkpoint_dt_200.pkl",
                 "--data_dir",
-                "/home/vidmod/lvd-dev/2361-latent-video-diffusion/data/latent/"
+                "data/latent"
+
             ]
-        }
+        },
     ]
 }

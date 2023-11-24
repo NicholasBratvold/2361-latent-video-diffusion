@@ -2,6 +2,7 @@ import json
 import tqdm
 import os
 import pickle
+import dill
 import functools
 import numpy
 import cv2
@@ -24,7 +25,7 @@ def save_checkpoint(state, filepath):
         os.makedirs(directory)
 
     with open(filepath, 'wb') as f:
-        pickle.dump(state, f)
+        dill.dump(state, f) #
 
 def load_checkpoint(filepath):
     if not os.path.exists(filepath):
@@ -39,10 +40,10 @@ def show_samples(samples):
     for x in samples:
         y = jax.lax.clamp(0., x ,255.)
         frame = np.array(y.transpose(2,1,0),dtype=np.uint8)
-        file_path = os.path.join(os.path.expanduser('~'), "lvd-dev/2361-latent-video-diffusion/generation", "vae_test" + str(i) + ".jpg")
+        file_path = os.path.join(os.path.expanduser('~'), "lvd-dev/2361-latent-video-diffusion/generation", "r_" + str(i) + ".jpg")
         print(file_path)
         if cv2.imwrite(file_path, frame):
-            print("saved")
+            print("saved video")
         i = i + 1
         #cv2.waitKey(0)
     #cv2.destroyAllWindows()

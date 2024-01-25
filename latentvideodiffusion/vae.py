@@ -168,9 +168,7 @@ def reconstruct(args, cfg):
 
 def train(args, cfg):
     print("Entered VAE Training Function")
-    ckpt_dir = cfg["vae"]["train"]["ckpt_dir"]
     lr = cfg["vae"]["train"]["lr"]
-    ckpt_interval = cfg["vae"]["train"]["ckpt_interval"]
     video_paths_train = cfg["vae"]["train"]["data_dir_train"]
     video_paths_val = cfg["vae"]["train"]["data_dir_val"]
     batch_size = cfg["vae"]["train"]["bs"]
@@ -179,6 +177,14 @@ def train(args, cfg):
     kl_a = cfg["vae"]["train"]["kl_alpha"]
     adam_optimizer = optax.adam(lr)
     optimizer = optax.chain(adam_optimizer, optax.zero_nans(), optax.clip_by_global_norm(clip_norm))
+
+    #load  ckpt params from cfg
+    ckpt_params = {
+        "ckpt_type" : "vae",
+        "ckpt_dir"  : cfg["vae"]["train"]["ckpt_dir"],
+        "max_ckpts" : cfg["vae"]["train"]["max_ckpts"],
+        "ckpt_interval" : cfg["vae"]["train"]["ckpt_interval"]
+    }
     
     if args.checkpoint is None:
         key = jax.random.PRNGKey(cfg["seed"])
@@ -187,13 +193,16 @@ def train(args, cfg):
         opt_state = optimizer.init(vae)
         i = 0
         state = vae, opt_state, state_key, i
+        checkpoint_state = utils.create_checkpoint_state(**ckpt_params)
     else:
         checkpoint_path = args.checkpoint
-        state = utils.load_checkpoint(checkpoint_path)
+        state,checkpoint_state = utils.load_checkpoint_state(checkpoint_path, **ckpt_params)
     
     dir_name = os.path.dirname(metrics_path)
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
+
+
     ################### ORIGINAL TRAINING LOOP #####################
     with open(metrics_path,"a") as f:
         #TODO: Fix Frame extractor rng
@@ -209,6 +218,7 @@ def train(args, cfg):
                     # Update state
                     val_loss, _ = utils.update_state(state, val_data, optimizer, vae_loss)
                     train_loss, state = utils.update_state(state, train_data, optimizer, vae_loss)
+
                     #print("Updated state in ", time.time()-loop_time, " seconds")
                     # Print or log training and validation losses
                     #print(f"Training Loss: {train_loss}, Validation Loss: {val_loss}")
@@ -216,11 +226,15 @@ def train(args, cfg):
                     # Save metrics to file
                     f.write(f"{train_loss}\t{val_loss}\n")
                     f.flush()
-                    iteration = state[3]
-                    if (iteration % ckpt_interval) == (ckpt_interval - 1):
-                        ckpt_path = utils.ckpt_path(ckpt_dir, iteration+1, "vae")
-                        utils.save_checkpoint(state, ckpt_path)
-                        print("---------CHECKPOINT SAVED----------")
+                    iteration =C
+                    state, checkpoint_state = utils.update_checkpoint_state(state, checkpoint_state)
+                    
+                    # if (iteration % ckpt_interval) == (ckpt_interval - 1):
+                    #     ckpt_path = utils.ckpt_path(ckpt_dir, iteration+1, "vae")
+                    #     utils.save_checkpoint(state, ckpt_path)
+                    #     utils.clear_checkpoints(state, ckpt_path, num_ckpts)
+                        
+                    #     print("---------CHECKPOINT SAVED----------")
 
     # ################ REVISED TRAINING LOOP WITH DATA PARALLELISM ###############
 

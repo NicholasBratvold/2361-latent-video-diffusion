@@ -226,8 +226,7 @@ def train(args, cfg):
                     # Save metrics to file
                     f.write(f"{train_loss}\t{val_loss}\n")
                     f.flush()
-                    iteration =C
-                    state, checkpoint_state = utils.update_checkpoint_state(state, checkpoint_state)
+                    checkpoint_state = utils.update_checkpoint_state(state, checkpoint_state)
                     
                     # if (iteration % ckpt_interval) == (ckpt_interval - 1):
                     #     ckpt_path = utils.ckpt_path(ckpt_dir, iteration+1, "vae")

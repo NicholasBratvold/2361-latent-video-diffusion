@@ -204,7 +204,7 @@ def create_checkpoint_state(ckpt_type, ckpt_dir, max_ckpts, ckpt_interval, *args
         os.makedirs(ckpt_dir)
     else :        
         ckpt_list = [ckpt_file for ckpt_file in os.listdir(ckpt_dir) if (ckpt_type in ckpt_file)]
-        if len(ckpt_list !=0):
+        if len(ckpt_list) !=0:
             print(f"Warning : The checkpoint directory {ckpt_dir} already has checkpoints of type {ckpt_type} in it. These may be deleted.")
             print(f"\n\nPress any key to continue...")
             input()
@@ -237,6 +237,9 @@ def update_checkpoint_state(state, ckpt_state):
                 delete_path = chkpt_queue.popleft()
                 os.remove(delete_path)
                 print(f"File '{delete_path}' deleted")
+        ckpt_list = list(chkpt_queue)
+    
+    return [ckpt_type, ckpt_dir, max_ckpts, ckpt_interval, ckpt_list]
 
 def load_checkpoint_state(filepath, max_ckpts, ckpt_interval, ckpt_type, *args):
     """
@@ -256,7 +259,7 @@ def load_checkpoint_state(filepath, max_ckpts, ckpt_interval, ckpt_type, *args):
     ckpt_list_sorted = sorted(ckpt_list, key=lambda s: int(re.search(r'\d+', s).group()))
 
     ckpt_state = [ckpt_type, ckpt_dir, max_ckpts, ckpt_interval, ckpt_list_sorted]
-    return state
+    return state, ckpt_state
     
 
 

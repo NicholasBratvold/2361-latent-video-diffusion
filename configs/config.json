@@ -4,7 +4,7 @@
     "n_latent": 512
   },
   "transcode": {
-    "bs": 32, 
+    "bs": 1, 
     "target_size": [512, 300]
   },
   "vae": {
@@ -53,6 +53,12 @@
       "metrics_path": "../../logs/loss_dt_2048.txt",
       "clip_norm": 10
     }
+  },
+  "checkpoints":{
+    "ckpt_dir": "/home/vidmod/lvd-dev/lvd-work-dir/checkpoints/checkpoint_test",
+    "ckpt_name": "loss_vae_213vid",
+    "ckpt_interval": 5,
+    "max_ckpts" : 3
   }
 }
 

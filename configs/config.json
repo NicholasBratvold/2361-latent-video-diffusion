@@ -18,10 +18,7 @@
       "generation_path": "../../generation/checkpoint_test"
     },
     "train": {
-      "ckpt_dir": "/home/vidmod/lvd-dev/lvd-work-dir/checkpoints/checkpoint_test",
       "lr": 0.1,
-      "ckpt_interval": 5,
-      "max_ckpts" : 3,
       "data_dir_train": "/home/vidmod/lvd-dev/lvd-work-dir/data/training_small",
       "data_dir_val": "/home/vidmod/lvd-dev/lvd-work-dir/data/validation_small",
       "bs": 1,
@@ -53,6 +50,12 @@
       "metrics_path": "../../logs/loss_dt_2048.txt",
       "clip_norm": 10
     }
+  },
+  "checkpoints":{
+    "ckpt_dir": "/home/vidmod/lvd-dev/lvd-work-dir/checkpoints/checkpoint_test",
+    "ckpt_name": "loss_vae_213vid",
+    "ckpt_interval": 5,
+    "max_ckpts" : 3
   }
 }
 

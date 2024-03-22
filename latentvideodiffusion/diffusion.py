@@ -160,9 +160,7 @@ def sample(args, cfg):
 
 def train(args, cfg):
     key = jax.random.PRNGKey(cfg["seed"])
-    ckpt_dir = cfg["dt"]["train"]["ckpt_dir"]
     lr = cfg["dt"]["train"]["lr"]
-    ckpt_interval = cfg["dt"]["train"]["ckpt_interval"]
     latent_train = cfg["dt"]["train"]["data_dir_train"]
     latent_val = cfg["dt"]["train"]["data_dir_val"]
     batch_size = cfg["dt"]["train"]["bs"]
@@ -190,9 +188,9 @@ def train(args, cfg):
         opt_state = optimizer.init(model)
         i = 0
         state = model, opt_state, state_key, i
+        _ , checkpoint_state = utils.get_checkpoint_state(args,cfg)
     else:
-        checkpoint_path = args.checkpoint
-        state = utils.load_checkpoint(checkpoint_path)
+        state,checkpoint_state = utils.get_checkpoint_state(args,cfg)
     
     with open(metrics_path,"w") as f:
         #TODO: Fix LatentDataset RNG
@@ -208,8 +206,4 @@ def train(args, cfg):
                     
                     f.write(f"{loss_train}\t{loss_val}\n")
                     f.flush()
-                    iteration = state[3]
-                    if (iteration % ckpt_interval) == (ckpt_interval - 1):
-                        ckpt_path = utils.ckpt_path(ckpt_dir, iteration+1, "dt")
-                        utils.save_checkpoint(state, ckpt_path)
-
+                    checkpoint_state = utils.update_checkpoint_state(state, checkpoint_state)

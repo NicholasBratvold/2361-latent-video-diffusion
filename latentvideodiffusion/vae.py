@@ -178,13 +178,6 @@ def train(args, cfg):
     adam_optimizer = optax.adam(lr)
     optimizer = optax.chain(adam_optimizer, optax.zero_nans(), optax.clip_by_global_norm(clip_norm))
 
-    #load  ckpt params from cfg
-    ckpt_params = {
-        "ckpt_type" : "vae",
-        "ckpt_dir"  : cfg["vae"]["train"]["ckpt_dir"],
-        "max_ckpts" : cfg["vae"]["train"]["max_ckpts"],
-        "ckpt_interval" : cfg["vae"]["train"]["ckpt_interval"]
-    }
     
     if args.checkpoint is None:
         key = jax.random.PRNGKey(cfg["seed"])
@@ -193,10 +186,10 @@ def train(args, cfg):
         opt_state = optimizer.init(vae)
         i = 0
         state = vae, opt_state, state_key, i
-        checkpoint_state = utils.create_checkpoint_state(**ckpt_params)
+        _ , checkpoint_state = utils.get_checkpoint_state(args,cfg)
     else:
         checkpoint_path = args.checkpoint
-        state,checkpoint_state = utils.load_checkpoint_state(checkpoint_path, **ckpt_params)
+        state,checkpoint_state = utils.get_checkpoint_state(args,cfg)
     
     dir_name = os.path.dirname(metrics_path)
     if not os.path.exists(dir_name):

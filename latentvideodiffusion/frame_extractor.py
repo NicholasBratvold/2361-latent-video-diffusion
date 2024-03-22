@@ -4,15 +4,10 @@ from jax import jit
 import timeit
 import numpy as np
 import os
-import cProfile
-from PIL import Image
-import time
-import bisect
 
-class FrameExtractorNick:
+class FrameExtractor:
     def __init__(self, directory_path, batch_size, key, target_size=(512,300)):
         self.directory_path = directory_path
-        self.video_files = [f for f in os.listdir(directory_path) if f.endswith(('.mp4', '.avi', '.npy'))] # Adjust as needed
         self.video_files = [f for f in os.listdir(directory_path) if f.endswith(('.mp4', '.avi', '.npy'))] # Adjust as needed
         self.batch_size = batch_size
         self.key = key
@@ -82,11 +77,27 @@ class FrameExtractorNick:
                     frames.append(frame)
        
         array = jax.numpy.array(frames)
-        time_end = time.time()
-        print("ended next (Base)")
-        print("time (Base):", time_end- time_start)
-        
         return array.transpose(0,3,2,1)
+    
+    def preload_data(self):
+        self.preloaded_data = {}
+        self.i = 1
+        for vid_pth in self.video_files:
+            full_path = os.path.join(self.directory_path, vid_pth)
+            if vid_pth.endswith('.npy'):
+                self.preloaded_data[vid_pth] = np.load(full_path)
+            else:
+                cap = cv2.VideoCapture(full_path)
+                frames = []
+                while cap.isOpened():
+                    ret, frame = cap.read()
+                    if not ret:
+                        break
+                    frames.append(frame)
+                cap.release()
+                print("Loaded {} Video", self.i)
+                self.i += 1
+                self.preloaded_data[vid_pth] = frames
     
 
 def extract_frames(video_path, num_frames, key, target_size=(512, 300)):
@@ -109,3 +120,34 @@ def extract_frames(video_path, num_frames, key, target_size=(512, 300)):
     cap.release()
 
     return jax.numpy.array(frames).transpose(0, 3, 2, 1)
+
+
+
+
+def test_frame_extractor(directory_path, batch_size, key_seed):
+    key = jax.random.PRNGKey(key_seed)
+    
+    
+    times = []
+    with FrameExtractor(directory_path, batch_size, key) as extractor:
+        # Iterate over the frame extractor and display the frames
+        overhead_start = timeit.default_timer()
+        overhead_end = timeit.default_timer() - overhead_start
+        print("Overhead time of  ", overhead_end)
+
+        for i in range(20):
+            start_time = timeit.default_timer()
+            extractor.__next__().block_until_ready()
+            end_time = timeit.default_timer() - start_time
+            print(f"Iteration {i} : Time {end_time}\n")
+            times.append(round(end_time,3))
+    print("Min time of ", min(times))
+
+# def main() -> None:
+#     directory_path = "/mnt/disks/persist/vidmod/data/training_resize"
+#     batch_size = 120
+#     key_seed = 800 
+#     test_frame_extractor(directory_path, batch_size, key_seed)  
+
+# if __name__ == '__main__' : 
+#     main()

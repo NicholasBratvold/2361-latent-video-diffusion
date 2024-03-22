@@ -23,9 +23,14 @@ class ConvResBlock(eqx.Module):
         b = jax.nn.leaky_relu(a)
         c = self.outp_layer(b)
         d = c + x
-        y = self.layer_norm(d) #ValueError: `LayerNorm(shape)(x)` must satisfy the invariant `shape == x.shape`Received `shape=(8,) and `x.shape=(8, 256, 150)`
+        # y = self.layer_norm(d) #ValueError: `LayerNorm(shape)(x)` must satisfy the invariant `shape == x.shape`Received `shape=(8,) and `x.shape=(8, 256, 150)`
                                #You might need to replace `layer_norm(x)` with `jax.vmap(layer_norm)(x)`.
         # y = self.channel_norm(d)
+
+        eps = 1e-05
+        means = jnp.mean(d, axis=0, keepdims=True)
+        vars = jnp.var(d, axis=0, keepdims=True)
+        y = (x  - means) / jnp.sqrt(vars + eps)
         return y
 
     # def __getstate__(self):

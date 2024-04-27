@@ -1,3 +1,5 @@
+![Alt text](summary.png?raw=true "Title")
+
 ### Features
 
 -  VAE Model 
